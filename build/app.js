@@ -8,6 +8,11 @@ const node_path_1 = require("node:path");
 const autoload_1 = __importDefault(require("@fastify/autoload"));
 const config_1 = __importDefault(require("./config"));
 const feedParser_route_1 = require("./modules/feedParser/routes/feedParser.route");
+/**
+ * Builds a Fastify server with plugins loaded.
+ * @param {AppOptions} options - Options for the Fastify server.
+ * @returns {Promise<Fastify>} - A promise that resolves with a Fastify server instance.
+ */
 async function buildApp(options = {}) {
     const fastify = (0, fastify_1.default)({ logger: true });
     await fastify.register(config_1.default);

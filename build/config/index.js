@@ -14,8 +14,14 @@ exports.default = (0, fastify_plugin_1.default)(async (fastify) => {
             confKey: "config",
             schema: schema_1.EnvSchema,
             dotenv: true,
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             data: process.env,
             ajv: {
+                /**
+                 * Custom options for the Ajv instance used by the config plugin.
+                 * See https://ajv.js.org/options.html for available options.
+                 * @returns {Ajv} An instance of Ajv with custom options set.
+                 */
                 customOptions: () => {
                     const ajv = new ajv_1.default({
                         allErrors: true,
