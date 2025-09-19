@@ -6,6 +6,11 @@ import { getFeedDataRoutes } from "./modules/feedParser/routes/feedParser.route"
 
 export type AppOptions = Partial<FastifyServerOptions>;
 
+/**
+ * Builds a Fastify server with plugins loaded.
+ * @param {AppOptions} options - Options for the Fastify server.
+ * @returns {Promise<Fastify>} - A promise that resolves with a Fastify server instance.
+ */
 async function buildApp(options: AppOptions = {}) {
 	const fastify = Fastify({ logger: true });
 	await fastify.register(configPlugin);

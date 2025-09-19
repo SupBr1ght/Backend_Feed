@@ -20,7 +20,7 @@ export default fp(
 					 * See https://ajv.js.org/options.html for available options.
 					 * @returns {Ajv} An instance of Ajv with custom options set.
 					 */
-					customOptions: () => {
+					customOptions: (): Ajv => {
 						const ajv = new Ajv({
 							allErrors: true,
 							removeAdditional: "all",
