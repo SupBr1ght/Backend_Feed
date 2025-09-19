@@ -12,8 +12,14 @@ export default fp(
 				confKey: "config",
 				schema: EnvSchema,
 				dotenv: true,
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				data: process.env as any,
 				ajv: {
+					/**
+					 * Custom options for the Ajv instance used by the config plugin.
+					 * See https://ajv.js.org/options.html for available options.
+					 * @returns {Ajv} An instance of Ajv with custom options set.
+					 */
 					customOptions: () => {
 						const ajv = new Ajv({
 							allErrors: true,
