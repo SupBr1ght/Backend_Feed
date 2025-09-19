@@ -8,13 +8,12 @@ async function start() {
 	const port = fastify.config.PORT;
 	const host = fastify.config.HOST;
 
-	fastify.listen({ port, host }, (err, address) => {
-		if (err) {
-			console.log(err);
-			process.exit(1);
-		}
-		console.log(`Server running at ${address}`);
-	});
+	try {
+		await fastify.listen({ port: 3000 });
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
 }
 
 void start();
