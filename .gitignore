@@ -2,3 +2,5 @@ node_modules
 .env
 .vscode
 build
+
+/src/generated/prisma
