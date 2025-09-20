@@ -16,7 +16,7 @@ const parser = new Parser();
 export async function fetchAndSaveFeed(
 	prisma: PrismaClient,
 	url: string,
-	force?: boolean,
+	force: boolean = false,
 ) {
 	const feed = await parser.parseURL(url);
 	const db = fetchAndSaveFeedDB(prisma);
@@ -27,23 +27,16 @@ export async function fetchAndSaveFeed(
 			const link = item.link || "";
 			if (!link) return null;
 			// check if the record with this link already exists
-			const existing = await db.findByLink(link);
-
-			if (!existing) {
-				return await db.create({
+			try {
+				return await db.upsertFeedItem({
 					title: item.title || "",
-					link,
+					link: item.link || "",
 					content: item.contentSnippet || item.content || "",
 					image: item.enclosure?.url || null,
 				});
-			} else if (force) {
-				return await db.update(link, {
-					title: item.title || "",
-					content: item.contentSnippet || item.content || "",
-					image: item.enclosure?.url || null,
-				});
-			} else {
-				return existing;
+			} catch (error) {
+				console.error(error);
+				return null;
 			}
 		}),
 	);
@@ -51,5 +44,6 @@ export async function fetchAndSaveFeed(
 	return {
 		feedTitle: feed.title,
 		items: savedItems.filter(Boolean),
+		force,
 	};
 }

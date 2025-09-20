@@ -1,25 +1,26 @@
 import type { PrismaClient } from "@prisma/client";
 
 export function fetchAndSaveFeedDB(prisma: PrismaClient) {
-	async function findByLink(link: string) {
-		return await prisma.rssFeed.findUnique({ where: { link } });
-	}
-
-	async function create(data: {
+	async function upsertFeedItem(data: {
 		title: string;
 		link: string;
 		content: string;
 		image?: string | null;
 	}) {
-		return await prisma.rssFeed.create({ data });
+		return prisma.rssFeed.upsert({
+			where: { link: data.link },
+			update: {
+				title: data.title,
+				content: data.content,
+				image: data.image ?? null,
+			},
+			create: {
+				title: data.title,
+				link: data.link,
+				content: data.content,
+				image: data.image ?? null,
+			},
+		});
 	}
-
-	async function update(
-		link: string,
-		data: { title: string; content: string; image?: string | null },
-	) {
-		return await prisma.rssFeed.update({ where: { link }, data });
-	}
-
-	return { findByLink, create, update };
+	return { upsertFeedItem };
 }
