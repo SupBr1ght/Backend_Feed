@@ -3,9 +3,6 @@ import AutoLoad from "@fastify/autoload";
 import Fastify, { type FastifyServerOptions } from "fastify";
 import configPlugin from "./config";
 import { getFeedDataRoutes } from "./modules/feedParser/routes/feedParser.route";
-import dotenv from "dotenv";
-dotenv.config();
-
 export type AppOptions = Partial<FastifyServerOptions>;
 
 /**
