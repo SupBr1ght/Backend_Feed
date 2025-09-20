@@ -1,5 +1,6 @@
 import Parser from "rss-parser";
 import type { PrismaClient } from "@prisma/client";
+import { fetchAndSaveFeedDB } from "./mongodb.service";
 const parser = new Parser();
 
 /**
@@ -18,6 +19,7 @@ export async function fetchAndSaveFeed(
 	force?: boolean,
 ) {
 	const feed = await parser.parseURL(url);
+	const db = fetchAndSaveFeedDB(prisma);
 
 	const savedItems = await Promise.all(
 		// optimize mapping with Promise.all and async/await
@@ -25,27 +27,20 @@ export async function fetchAndSaveFeed(
 			const link = item.link || "";
 			if (!link) return null;
 			// check if the record with this link already exists
-			const existing = await prisma.rssFeed.findUnique({
-				where: { link },
-			});
+			const existing = await db.findByLink(link);
 
 			if (!existing) {
-				return await prisma.rssFeed.create({
-					data: {
-						title: item.title || "",
-						link,
-						content: item.contentSnippet || item.content || "",
-						image: item.enclosure?.url || null,
-					},
+				return await db.create({
+					title: item.title || "",
+					link,
+					content: item.contentSnippet || item.content || "",
+					image: item.enclosure?.url || null,
 				});
 			} else if (force) {
-				return await prisma.rssFeed.update({
-					where: { link },
-					data: {
-						title: item.title || "",
-						content: item.contentSnippet || item.content || "",
-						image: item.enclosure?.url || null,
-					},
+				return await db.update(link, {
+					title: item.title || "",
+					content: item.contentSnippet || item.content || "",
+					image: item.enclosure?.url || null,
 				});
 			} else {
 				return existing;
