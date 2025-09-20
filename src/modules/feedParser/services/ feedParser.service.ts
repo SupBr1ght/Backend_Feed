@@ -1,5 +1,6 @@
 import Parser from "rss-parser";
 import type { PrismaClient } from "@prisma/client";
+import { fetchAndSaveFeedDB } from "./mongodb.service";
 const parser = new Parser();
 
 /**
@@ -15,9 +16,10 @@ const parser = new Parser();
 export async function fetchAndSaveFeed(
 	prisma: PrismaClient,
 	url: string,
-	force?: boolean,
+	force: boolean = false,
 ) {
 	const feed = await parser.parseURL(url);
+	const db = fetchAndSaveFeedDB(prisma);
 
 	const savedItems = await Promise.all(
 		// optimize mapping with Promise.all and async/await
@@ -25,30 +27,16 @@ export async function fetchAndSaveFeed(
 			const link = item.link || "";
 			if (!link) return null;
 			// check if the record with this link already exists
-			const existing = await prisma.rssFeed.findUnique({
-				where: { link },
-			});
-
-			if (!existing) {
-				return await prisma.rssFeed.create({
-					data: {
-						title: item.title || "",
-						link,
-						content: item.contentSnippet || item.content || "",
-						image: item.enclosure?.url || null,
-					},
+			try {
+				return await db.upsertFeedItem({
+					title: item.title || "",
+					link: item.link || "",
+					content: item.contentSnippet || item.content || "",
+					image: item.enclosure?.url || null,
 				});
-			} else if (force) {
-				return await prisma.rssFeed.update({
-					where: { link },
-					data: {
-						title: item.title || "",
-						content: item.contentSnippet || item.content || "",
-						image: item.enclosure?.url || null,
-					},
-				});
-			} else {
-				return existing;
+			} catch (error) {
+				console.error(error);
+				return null;
 			}
 		}),
 	);
@@ -56,5 +44,6 @@ export async function fetchAndSaveFeed(
 	return {
 		feedTitle: feed.title,
 		items: savedItems.filter(Boolean),
+		force,
 	};
 }
