@@ -1,0 +1,17 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGO_URI")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model RssFeed {
+  id        String      @id @map("_id") @default(auto()) @db.ObjectId
+  title     String                                
+  link      String   @unique                         
+  content   String?                                 
+  image     String?                                
+  createdAt DateTime @default(now())
+}
