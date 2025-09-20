@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 
 export function fetchAndSaveFeedDB(prisma: PrismaClient) {
 	async function findByLink(link: string) {
