@@ -25,8 +25,14 @@ async function buildApp(options: AppOptions = {}) {
 			ignorePattern: /^((?!plugin).)*$/,
 		});
 
+		// load routes from feedparser
 		await fastify.register(AutoLoad, {
-			dir: join(__dirname, "routes"),
+			dir: join(__dirname, "modules/feedParser/routes"),
+		});
+
+		// load routes from root
+		await fastify.register(AutoLoad, {
+			dir: join(__dirname, "/routes"),
 		});
 
 		fastify.log.info("✅ Plugins loaded successfully");
