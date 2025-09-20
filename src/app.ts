@@ -1,6 +1,6 @@
-import Fastify, { FastifyServerOptions } from "fastify";
 import { join } from "node:path";
 import AutoLoad from "@fastify/autoload";
+import Fastify, { type FastifyServerOptions } from "fastify";
 import configPlugin from "./config";
 import { getFeedDataRoutes } from "./modules/feedParser/routes/feedParser.route";
 
@@ -32,10 +32,6 @@ async function buildApp(options: AppOptions = {}) {
 		fastify.log.error("Error in autoload:", error);
 		throw error;
 	}
-
-	fastify.get("/", async (request, reply) => {
-		return { hello: "world" };
-	});
 
 	fastify.register(getFeedDataRoutes);
 

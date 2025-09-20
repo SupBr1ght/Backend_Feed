@@ -1,6 +1,6 @@
-import { FastifyInstance } from "fastify";
+import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import type { FastifyInstance } from "fastify";
 import { schema } from "../schemas/getFeedData.schema";
-import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 /**
  * Registers a route to get feed data.

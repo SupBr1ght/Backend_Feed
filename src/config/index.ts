@@ -12,8 +12,7 @@ export default fp(
 				confKey: "config",
 				schema: EnvSchema,
 				dotenv: true,
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-				data: process.env as any,
+				data: process.env,
 				ajv: {
 					/**
 					 * Custom options for the Ajv instance used by the config plugin.
