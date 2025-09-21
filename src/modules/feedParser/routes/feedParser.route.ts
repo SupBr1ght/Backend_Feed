@@ -17,11 +17,10 @@ const feedRoute = async (fastify: FastifyInstance) => {
 		},
 		async (request, reply) => {
 			// enpoint with url and force flag
-			let { url, force } = request.query as { url: string; force?: boolean };
-
-			if (!url) {
-				url = "https://www.reddit.com/.rss";
-			}
+			const { url = "https://www.reddit.com/.rss", force } = request.query as {
+				url: string;
+				force?: boolean;
+			};
 
 			try {
 				// pass Prisma client to keep the service logic separate and make testing easier
