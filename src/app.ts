@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import AutoLoad from "@fastify/autoload";
 import Fastify, { type FastifyServerOptions } from "fastify";
-import configPlugin from "./config";
+import FastifySwaggerPlugin from "./modules/feedParser/plugins/FastifySwagger.plugin";
 export type AppOptions = Partial<FastifyServerOptions>;
 
 /**
@@ -11,9 +11,10 @@ export type AppOptions = Partial<FastifyServerOptions>;
  */
 async function buildApp(options: AppOptions = {}) {
 	const fastify = Fastify({ logger: true });
-	await fastify.register(configPlugin);
 
 	try {
+		await fastify.register(FastifySwaggerPlugin);
+
 		fastify.decorate("pluginLoaded", (pluginName: string) => {
 			fastify.log.info(`✅ Plugin loaded: ${pluginName}`);
 		});
