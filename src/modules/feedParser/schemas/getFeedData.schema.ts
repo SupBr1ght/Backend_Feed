@@ -5,7 +5,6 @@ export const schema = {
 		"RSS feed endpoint that accepts `url` and optional `force` query parameters",
 	querystring: {
 		type: "object",
-		required: ["url"],
 		properties: {
 			url: { type: "string", format: "uri", description: "RSS feed URL" },
 			force: { type: "boolean", description: "Force refresh feed" },

@@ -17,12 +17,10 @@ const feedRoute = async (fastify: FastifyInstance) => {
 		},
 		async (request, reply) => {
 			// enpoint with url and force flag
-			const { url, force } = request.query as { url: string; force?: boolean };
+			let { url, force } = request.query as { url: string; force?: boolean };
 
 			if (!url) {
-				return reply
-					.status(400)
-					.send({ error: 'Query param "url" is required' });
+				url = "https://www.reddit.com/.rss";
 			}
 
 			try {

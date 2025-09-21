@@ -20,11 +20,10 @@ export async function fetchAndSaveFeed(
 ) {
 	const feed = await parser.parseURL(url);
 	const db = fetchAndSaveFeedDB(prisma);
-
 	const savedItems = await Promise.all(
 		// optimize mapping with Promise.all and async/await
 		feed.items.map(async (item) => {
-			const link = item.link || "";
+			const link = item.link;
 			if (!link) return null;
 			// check if the record with this link already exists
 			try {
