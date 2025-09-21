@@ -7,7 +7,7 @@ import { fetchAndSaveFeed } from "../services/ feedParser.service";
  * Registers a route to get feed data.
  * @param {FastifyInstance} fastify - The Fastify server instance.
  */
-export async function getFeedDataRoutes(fastify: FastifyInstance) {
+const feedRoute = async (fastify: FastifyInstance) => {
 	const route = fastify.withTypeProvider<JsonSchemaToTsProvider>();
 
 	route.get(
@@ -33,4 +33,6 @@ export async function getFeedDataRoutes(fastify: FastifyInstance) {
 			}
 		},
 	);
-}
+};
+
+export default feedRoute;
