@@ -1,4 +1,4 @@
-export const createUserSchema = {
+export const userAuthSchema = {
     tags: ["user"],
     summary: "Create user in db",
     description: "Create user in db",

@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
+
 export async function loginUser(
     prisma: PrismaClient,
     email: string,

@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import AutoLoad from "@fastify/autoload";
+import configPlugin from "./config";
 import Fastify, { type FastifyServerOptions } from "fastify";
 export type AppOptions = Partial<FastifyServerOptions>;
 
@@ -13,6 +14,8 @@ async function buildApp(options: AppOptions = {}) {
 
 	try {
 
+		await fastify.register(configPlugin)
+
 		fastify.decorate("pluginLoaded", (pluginName: string) => {
 			fastify.log.info(`✅ Plugin loaded: ${pluginName}`);
 		});
@@ -23,14 +26,6 @@ async function buildApp(options: AppOptions = {}) {
 			options: options,
 			ignorePattern: /^((?!plugin).)*$/,
 		});
-
-		// load routes after plugins
-		// await fastify.register(AutoLoad, {
-		// 	dir: join(__dirname, "routes"),
-		// 	matchFilter: file => file.endsWith(".route.js") || file.endsWith(".route.ts"),
-		// 	options: options,
-		// 	ignorePattern: /.*\.spec\.(ts|js)/,
-		// });
 
 		await fastify.register(AutoLoad, {
 			dir: join(__dirname, "routes"),
