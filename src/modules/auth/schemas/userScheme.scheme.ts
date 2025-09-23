@@ -17,7 +17,6 @@ export const createUserSchema = {
 			type: "object",
 			properties: {
 				email: { type: "string" },
-				password: { type: "string" },
 			},
 		},
 	},

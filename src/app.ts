@@ -1,7 +1,6 @@
 import { join } from "node:path";
 import AutoLoad from "@fastify/autoload";
 import Fastify, { type FastifyServerOptions } from "fastify";
-import FastifySwaggerPlugin from "./modules/feedParser/plugins/FastifySwagger.plugin";
 export type AppOptions = Partial<FastifyServerOptions>;
 
 /**
@@ -13,7 +12,6 @@ async function buildApp(options: AppOptions = {}) {
 	const fastify = Fastify({ logger: true });
 
 	try {
-		await fastify.register(FastifySwaggerPlugin);
 
 		fastify.decorate("pluginLoaded", (pluginName: string) => {
 			fastify.log.info(`✅ Plugin loaded: ${pluginName}`);
@@ -27,9 +25,18 @@ async function buildApp(options: AppOptions = {}) {
 		});
 
 		// load routes after plugins
+		// await fastify.register(AutoLoad, {
+		// 	dir: join(__dirname, "routes"),
+		// 	matchFilter: file => file.endsWith(".route.js") || file.endsWith(".route.ts"),
+		// 	options: options,
+		// 	ignorePattern: /.*\.spec\.(ts|js)/,
+		// });
+
 		await fastify.register(AutoLoad, {
-			dir: join(__dirname, "/routes"),
-		});
+			dir: join(__dirname, "routes"),
+			options: options,
+			matchFilter: file => file.endsWith(".route.ts") || file.endsWith(".route.js"),
+		})
 
 		fastify.log.info("✅ Plugins loaded successfully");
 	} catch (error) {

@@ -5,5 +5,6 @@ declare module "fastify" {
 		config: Config;
 		pluginLoaded: (pluginName: string) => void;
 		prisma: PrismaClient;
+		bcrypt: Bcrypt;
 	}
 }
