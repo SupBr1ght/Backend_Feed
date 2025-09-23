@@ -4,6 +4,9 @@ import ajvFormats from "ajv-formats";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import { EnvSchema } from "./schema";
+import cookie from "@fastify/cookie";
+import fastifySession from "@fastify/session";
+
 
 export default fp(
 	async (fastify: FastifyInstance) => {
@@ -29,6 +32,22 @@ export default fp(
 						ajvFormats(ajv);
 						return ajv;
 					},
+				},
+
+			});
+
+			const secret = fastify.config.COOKIE_SECRET;
+			if (!secret) throw new Error("COOKIE_SECRET is not defined");
+
+			fastify.register(cookie);
+
+			await fastify.register(fastifySession, {
+				secret: secret,
+				cookieName: "sessionId",
+				cookie: {
+					secure: fastify.config.COOKIE_SECURE,
+					maxAge: fastify.config.COOKIE_MAX_AGE,
+					httpOnly: fastify.config.COOKIE_HTTP_ONLY,
 				},
 			});
 

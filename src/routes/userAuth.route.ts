@@ -39,7 +39,7 @@ const defaultRoute = async (fastify: FastifyInstance) => {
                 const user = await registerUser(fastify);
 
                 // set session
-                request.session.userId = { id: user.id };
+                request.session.userId = user.id;
 
                 return reply.status(201).send({ "logged in": user.email });
             } catch (error) {

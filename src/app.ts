@@ -16,6 +16,7 @@ async function buildApp(options: AppOptions = {}) {
 
 		await fastify.register(configPlugin)
 
+
 		fastify.decorate("pluginLoaded", (pluginName: string) => {
 			fastify.log.info(`✅ Plugin loaded: ${pluginName}`);
 		});
