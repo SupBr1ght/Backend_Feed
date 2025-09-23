@@ -5,8 +5,15 @@ export const EnvSchema = {
 	properties: {
 		PORT: { type: "number" },
 		HOST: { type: "string" },
+		MONGO_URI: { type: "string" },
+		COOKIE_SECRET: { type: "string" },
+		COOKIE_SECURE: { type: "boolean" },
+		COOKIE_MAX_AGE: { type: "number" },
+		COOKIE_HTTP_ONLY: { type: "boolean" },
+		FULL_HOST: { type: "string" },
+
 	},
-	required: ["PORT", "HOST"],
+	required: ["PORT", "HOST", "MONGO_URI", "COOKIE_SECRET"],
 	additionalProperties: false,
 } as const;
 
