@@ -6,6 +6,21 @@ import { userAuthSchema } from "../modules/auth/schemas/userAuth.scheme";
 const defaultRoute = async (fastify: FastifyInstance) => {
     const route = fastify.withTypeProvider<JsonSchemaToTsProvider>();
 
+    route.get(
+        "/profile",
+        {
+            schema: userAuthSchema,
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = await fastify.prisma.user.findFirst({
+                where: {
+                    id: request.session.userId
+                }
+            })
+            return reply.status(200).send(user);
+        }
+    )
+
     route.post(
         "/login",
         {
@@ -23,9 +38,10 @@ const defaultRoute = async (fastify: FastifyInstance) => {
 
                 const user = await registerUser(fastify);
 
-                request.session.sessionId = user.id
+                // set session
+                request.session.userId = { id: user.id };
 
-                return reply.status(201).send({ email: user.email, id: user.id });
+                return reply.status(201).send({ "logged in": user.email });
             } catch (error) {
                 return reply.status(500).send({ error: error.message })
             }
