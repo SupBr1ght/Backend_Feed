@@ -11,7 +11,7 @@ export default fp(async (fastify) => {
                 description: "Testing the Fastify swagger API",
                 version: "0.1.0",
             },
-            servers: [{ url: fastify.config.FULL_HOST }],
+            servers: [{ url: fastify.config.FULL_HOST! }],
         },
     });
 
