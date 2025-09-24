@@ -28,7 +28,6 @@
 		"fastify-bcrypt": "^1.0.1",
 		"fastify-plugin": "^5.0.1",
 		"json-schema-to-ts": "^3.1.1",
-		"node-fetch": "^3.3.2",
 		"rss-parser": "^3.13.0"
 	},
 	"devDependencies": {

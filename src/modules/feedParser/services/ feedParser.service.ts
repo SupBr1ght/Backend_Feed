@@ -2,6 +2,7 @@ import Parser from "rss-parser";
 import { PrismaClient } from "@prisma/client";
 import { fetchAndSaveFeedDB } from "./mongodb.service";
 import * as cheerio from "cheerio";
+import fastify from "fastify";
 
 const parser = new Parser();
 
@@ -35,7 +36,6 @@ async function parseHTML(prisma: PrismaClient, url: string) {
 			image,
 		};
 	} catch (err) {
-		console.error("Error parsing HTML:", url, err);
 		return null;
 	}
 }

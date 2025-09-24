@@ -57,6 +57,10 @@ export default fp(
 					httpOnly: fastify.config.COOKIE_HTTP_ONLY,
 				},
 			});
+			fastify.setErrorHandler((error, request, reply) => {
+				throw error
+			})
+
 
 			fastify.log.info("✅ Environment variables loaded successfully");
 		} catch (error) {
