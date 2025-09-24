@@ -9,8 +9,6 @@ import fastifySession from "@fastify/session";
 import cors, { fastifyCors } from '@fastify/cors'
 
 
-
-
 export default fp(
 	async (fastify: FastifyInstance) => {
 		try {
