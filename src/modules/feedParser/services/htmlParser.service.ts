@@ -1,56 +1,79 @@
 import * as cheerio from 'cheerio';
 import fetch from 'node-fetch';
-import { getURL } from './getURL.service';
 import { PrismaClient } from '@prisma/client';
 
-/**
- * Fetches an RSS feed and saves it to the database.
- * @param {PrismaClient} prisma - The Prisma client instance.
- * @returns {Promise<{link: string, content: string, image: string | null}[]>}
- * A promise that resolves with an array of objects containing the feed link, content, and image properties.
- */
-export async function fetchAndSaveFeed(prisma: PrismaClient) {
+export async function fetchAndUpdateFeed(
+    prisma: PrismaClient,
+    url: string,
+) {
+    try {
+        console.log('Processing URL:', url);
 
-    const feedLinks = await getURL(prisma) || "urls is not found";
-    const feedLink = await Promise.all(
-        feedLinks.map(async (feedLink) => {
-            try {
-                const response = await fetch(feedLink.link);
-                const html = await response.text();
-                const $ = cheerio.load(html);
-                const content = $('div.article-body').text().trim();
-                const image = $('img.main-image').attr('src');
+        const $ = await cheerio.fromURL(url);
 
-                if (!content && !image) return null;
+        const content: string[] = [];
 
-                const existingItem = await prisma.rssFeed.findUnique({
-                    where: { link: feedLink.link },
-                });
 
-                if (existingItem) {
-                    try {
-                        await prisma.rssFeed.update({
-                            where: { link: feedLink.link },
-                            data: {
-                                content,
-                                image,
-                            },
-                        });
-                    } catch (error) {
-                        console.error(error);
-                    }
-                }
+        /**
+         * Finds the article div and extracts the text content.
+         * The article div is expected to have a class of "publication-text".
+         * If the div is found, its text content is added to the content array.
+         */
+        const articleDiv = $('.publication-text');
+        if (articleDiv.length > 0) {
+            // Extract the text content of the article div
+            content.push(articleDiv.text().trim());
+        }
 
-                return {
-                    link: feedLink.link,
-                    content,
-                    image,
-                };
 
-            } catch (error) {
-                console.error(error);
-            }
-        }))
+        // first try to find the first <h1>; if not found, fall back to the meta tag og:title;
+        const title = $('h1').first().text().trim() || $('meta[property="og:title"]').attr('content') || url;
 
-    return feedLink;
+        // first check the og:image meta tag; if not found, take the first <img> inside the article container;
+        const image = $('meta[property="og:image"]').attr('content') ||
+            articleDiv.find('img').first().attr('src') || null;
+
+        // Join all content paragraphs into a single string with double newlines between paragraphs
+        const contentJoined = content.join('\n\n');
+
+
+
+        if (!content && !image) {
+            console.log('No content or image found for url:', url);
+            return null;
+        }
+
+
+        const saved = await prisma.rssFeed.upsert({
+            where: { link: url },
+            create: {
+                title,
+                link: url,
+                content: contentJoined,
+                image: image || null,
+            },
+            update: {
+                content: contentJoined,
+                image: image || null,
+            },
+        });
+
+        return {
+            feedTitle: title,
+            items: [
+                {
+                    title,
+                    link: url,
+                    content: contentJoined,
+                    image: image || null,
+                },
+            ],
+        };
+
+    } catch (error) {
+        console.error('Error processing url:', url, error);
+        return null;
+    }
+
+
 }
