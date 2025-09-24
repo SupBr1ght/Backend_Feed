@@ -1,31 +1,27 @@
-import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { schema } from "../modules/feedParser/schemas/getFeedData.schema";
-import { parseFeed } from "../modules/feedParser/services/parseFeed.service";
+import { parseFeed } from "../modules/feedParser/services/ feedParser.service";
 
-/**
- * Registers a route to get feed data.
- * @param {FastifyInstance} fastify - The Fastify server instance.
- */
+interface ParseArticleQuery {
+	url: string;
+	force?: boolean;
+}
+
 const feedRoute = async (fastify: FastifyInstance) => {
-	const route = fastify.withTypeProvider<JsonSchemaToTsProvider>();
+	fastify.get("/parse-article", async (request: FastifyRequest<{ Querystring: ParseArticleQuery }>, reply: FastifyReply) => {
+		const { url, force } = request.query;
 
-	route.get(
-		"/parse-article",
-		{
-			schema: schema,
-		},
-		async (request: FastifyRequest, reply: FastifyReply) => {
-			// enpoint with url and force flag
-			const { url, force } = request.query as { url: string; force?: boolean };
-			try {
-				const result = await parseFeed(fastify.prisma, url, force);
-				return reply.code(200).send({ ...result });
-			} catch (error) {
-				return reply.status(500).send({ error: (error as Error).message });
-			}
-		},
-	);
+		if (!url) {
+			return reply.status(400).send({ error: "URL не передано" });
+		}
+
+		try {
+			const result = await parseFeed(fastify.prisma, url, force);
+			return reply.code(200).send(result);
+		} catch (error) {
+			console.error("Error in /parse-article:", error);
+			return reply.status(500).send({ error: (error as Error).message });
+		}
+	});
 };
 
 export default feedRoute;
