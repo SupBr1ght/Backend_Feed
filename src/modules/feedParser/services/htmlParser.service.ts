@@ -1,5 +1,4 @@
 import * as cheerio from 'cheerio';
-import fetch from 'node-fetch';
 import { PrismaClient } from '@prisma/client';
 
 export async function fetchAndUpdateFeed(
