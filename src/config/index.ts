@@ -6,6 +6,7 @@ import fp from "fastify-plugin";
 import { EnvSchema } from "./schema";
 import cookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
+import cors, { fastifyCors } from '@fastify/cors'
 
 
 export default fp(
@@ -36,6 +37,10 @@ export default fp(
 
 			});
 
+			fastify.register(fastifyCors, {
+
+				origin: `${fastify.config.CORS_ORIGIN}`,
+			})
 			const secret = fastify.config.COOKIE_SECRET;
 			if (!secret) throw new Error("COOKIE_SECRET is not defined");
 
@@ -50,6 +55,10 @@ export default fp(
 					httpOnly: fastify.config.COOKIE_HTTP_ONLY,
 				},
 			});
+			fastify.setErrorHandler((error, request, reply) => {
+				throw error
+			})
+
 
 			fastify.log.info("✅ Environment variables loaded successfully");
 		} catch (error) {

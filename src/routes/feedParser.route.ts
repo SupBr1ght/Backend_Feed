@@ -1,35 +1,31 @@
-import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { parseFeed } from "../modules/feedParser/services/ feedParser.service";
 import { schema } from "../modules/feedParser/schemas/getFeedData.schema";
-import { fetchAndSaveFeed } from "../modules/feedParser/services/ feedParser.service";
+import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import { errorCodes } from 'fastify'
 
-/**
- * Registers a route to get feed data.
- * @param {FastifyInstance} fastify - The Fastify server instance.
- */
+
 const feedRoute = async (fastify: FastifyInstance) => {
-	const route = fastify.withTypeProvider<JsonSchemaToTsProvider>();
+	fastify.withTypeProvider<JsonSchemaToTsProvider>()
+		.get("/parse-article", { schema: schema }, async (request: FastifyRequest, reply: FastifyReply) => {
 
-	route.get(
-		"/feed",
-		{
-			schema: schema,
-		},
-		async (request, reply) => {
-			// enpoint with url and force flag
-			const { url = "https://www.reddit.com/.rss", force } = request.query as {
+			const { url, force } = request.query as {
 				url: string;
-				force?: boolean;
+				force: boolean;
 			};
 
+			if (!url) {
+				return reply.status(400).send({ error: "URL is required" });
+			}
+
 			try {
-				// pass Prisma client to keep the service logic separate and make testing easier
-				return await fetchAndSaveFeed(fastify.prisma, url, force);
+				const result = await parseFeed(fastify.prisma, url, force);
+				return reply.code(200).send(result);
 			} catch (error) {
+				request.log.error("Error in /parse-article:", error);
 				return reply.status(500).send({ error: error.message });
 			}
-		},
-	);
+		});
 };
 
 export default feedRoute;

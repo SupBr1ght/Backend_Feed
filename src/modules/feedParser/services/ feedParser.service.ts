@@ -1,48 +1,65 @@
 import Parser from "rss-parser";
-import type { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { fetchAndSaveFeedDB } from "./mongodb.service";
+import * as cheerio from "cheerio";
+import fastify from "fastify";
+
 const parser = new Parser();
 
-/**
- * Fetches and saves an RSS feed to the database.
- *
- * @param {PrismaClient} prisma - The Prisma client instance.
- * @param {string} url - The URL of the RSS feed.
- * @param {boolean} [force=false] - If true, forces a refresh of the feed by deleting and re-creating the item in the database.
- * @returns {Promise<{feedTitle: string, items: {title: string, link: string, content: string, image: string | null}[]}>}
- * A promise that resolves with an object containing the feed title and an array of saved items. The items array contains objects with title, link, content, and image properties.
+async function parseHTML(prisma: PrismaClient, url: string) {
+	try {
+		const res = await fetch(url);
+		const html = await res.text();
+		const $ = cheerio.load(html);
 
- */
-export async function fetchAndSaveFeed(
-	prisma: PrismaClient,
-	url: string,
-	force: boolean = false,
-) {
-	const feed = await parser.parseURL(url);
-	const db = fetchAndSaveFeedDB(prisma);
-	const savedItems = await Promise.all(
-		// optimize mapping with Promise.all and async/await
-		feed.items.map(async (item) => {
-			const link = item.link;
-			if (!link) return null;
-			// check if the record with this link already exists
-			try {
-				return await db.upsertFeedItem({
-					title: item.title || "",
-					link: item.link || "",
-					content: item.contentSnippet || item.content || "",
-					image: item.enclosure?.url || null,
-				});
-			} catch (error) {
-				console.error(error);
-				return null;
-			}
-		}),
-	);
 
-	return {
-		feedTitle: feed.title,
-		items: savedItems.filter(Boolean),
-		force,
-	};
+		const title = $("h1").first().text().trim() || $("meta[property='og:title']").attr("content") || url;
+
+
+		const image = $("meta[property='og:image']").attr("content") || $("img").first().attr("src") || null;
+
+		const paragraphs = $("p").map((i, el) => $(el).text().trim()).get();
+		const content = paragraphs.join("\n\n");
+
+		const saved = await fetchAndSaveFeedDB(prisma).upsertFeedItem({
+			title,
+			link: url,
+			content,
+			image,
+		});
+
+		return {
+			id: saved.id,
+			title,
+			link: url,
+			content,
+			image,
+		};
+	} catch (err) {
+		return null;
+	}
+}
+
+export async function parseFeed(prisma: PrismaClient, url: string, force?: boolean) {
+	const isRSS = url.includes("/feed/") || url.endsWith(".rss");
+
+	if (isRSS) {
+		const feed = await parser.parseURL(url);
+		const links = feed.items.map(item => item.link).filter(Boolean) as string[];
+
+		const fullArticles = await Promise.all(
+			links.map(link => parseHTML(prisma, link))
+		);
+
+		return {
+			feedTitle: feed.title,
+			items: fullArticles.filter(Boolean),
+		};
+	} else {
+		const article = await parseHTML(prisma, url);
+		return {
+			feedTitle: article?.title || url,
+			items: article ? [article] : [],
+		};
+	}
 }
