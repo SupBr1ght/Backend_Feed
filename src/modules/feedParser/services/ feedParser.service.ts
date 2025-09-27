@@ -64,16 +64,20 @@ export async function parseFeed(prisma: PrismaClient, url: string, force?: boole
 }
 
 export async function processAllFeeds(prisma: PrismaClient) {
-	const sources = await prisma.rssSource.findMany({
-		where: { active: true },
-		select: { id: true, url: true },
+	const sources = await prisma.rssFeed.findMany({
+		distinct: ["link"],
+		select: { link: true },
 	});
 
 	const results: { feedTitle: string; count: number }[] = [];
 
+
 	for (const src of sources) {
-		const result = await parseFeed(prisma, src.url);
-		results.push({ feedTitle: result.feedTitle ?? '', count: result.items.length });
+		const result = await parseFeed(prisma, src.link);
+		results.push({
+			feedTitle: result.feedTitle ?? "",
+			count: result.items.length,
+		});
 	}
 
 	return results;

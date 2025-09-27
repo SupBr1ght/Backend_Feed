@@ -5,19 +5,24 @@ export class FeedService {
     constructor(private prisma: PrismaClient) { }
 
     async processFeeds() {
-        const sources = await this.prisma.rssSource.findMany({
-            where: { active: true },
-            select: { id: true, url: true },
+
+        const sources = await this.prisma.rssFeed.findMany({
+            distinct: ["link"],
+            select: { link: true },
         });
 
-        const results: { sourceId: string; feedTitle: string; count: number }[] = [];
+        const results: { feedTitle: string; count: number }[] = [];
+
 
         for (const src of sources) {
             try {
-                const result = await parseFeed(this.prisma, src.url);
-                results.push({ sourceId: src.id, feedTitle: result.feedTitle ?? '', count: result.items.length });
+                const result = await parseFeed(this.prisma, src.link);
+                results.push({
+                    feedTitle: result.feedTitle ?? "",
+                    count: result.items.length,
+                });
             } catch (err) {
-                console.error(`Error parsing ${src.url}:`, err);
+                console.error(`Error parsing ${src.link}:`, err);
             }
         }
 

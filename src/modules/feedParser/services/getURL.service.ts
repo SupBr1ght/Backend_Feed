@@ -6,13 +6,17 @@ export async function getURL(prisma: PrismaClient) {
     });
 
     if (feedLink && feedLink.link) {
-        const exists = await prisma.rssSource.findUnique({
-            where: { url: feedLink.link },
+        const exists = await prisma.rssFeed.findUnique({
+            where: { link: feedLink.link },
         });
 
         if (!exists) {
-            await prisma.rssSource.create({
-                data: { url: feedLink.link, active: true },
+            await prisma.rssFeed.create({
+                data: {
+                    link: feedLink.link,
+                    title: feedLink.link,
+                    content: "",
+                },
             });
         }
     }

@@ -35,7 +35,7 @@ export default fp(async (fastify) => {
         }
     );
 
-    const job = new SimpleIntervalJob({ seconds: 10 }, task);
+    const job = new SimpleIntervalJob({ minutes: 30 }, task);
 
     fastify.ready().then(() => {
         fastify.scheduler.addSimpleIntervalJob(job);
