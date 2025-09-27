@@ -7,14 +7,28 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model RssFeed {
-  id        String      @id @map("_id") @default(auto()) @db.ObjectId
-  title     String                                
-  link      String   @unique                         
-  content   String?                                 
-  image     String?                                
-  createdAt DateTime @default(now())
+model RssSource {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  url       String    @unique
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  feeds     RssFeed[] @relation("SourceToFeeds")
 }
+
+model RssFeed {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  link      String     @unique
+  content   String
+  image     String?
+  createdAt DateTime   @default(now())
+
+  sourceId  String?
+  source    RssSource? @relation("SourceToFeeds", fields: [sourceId], references: [id])
+}
+
 
 model User {
   id    String @id @default(auto()) @map("_id") @db.ObjectId
