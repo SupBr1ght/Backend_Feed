@@ -2,7 +2,6 @@ import Parser from "rss-parser";
 import { PrismaClient } from "@prisma/client";
 import { fetchAndSaveFeedDB } from "./mongodb.service";
 import * as cheerio from "cheerio";
-import fastify from "fastify";
 
 const parser = new Parser();
 
@@ -62,4 +61,24 @@ export async function parseFeed(prisma: PrismaClient, url: string, force?: boole
 			items: article ? [article] : [],
 		};
 	}
+}
+
+export async function processAllFeeds(prisma: PrismaClient) {
+	const sources = await prisma.rssFeed.findMany({
+		distinct: ["link"],
+		select: { link: true },
+	});
+
+	const results: { feedTitle: string; count: number }[] = [];
+
+
+	for (const src of sources) {
+		const result = await parseFeed(prisma, src.link);
+		results.push({
+			feedTitle: result.feedTitle ?? "",
+			count: result.items.length,
+		});
+	}
+
+	return results;
 }
