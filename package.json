@@ -6,7 +6,7 @@
 		"dev": "concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"tsc -w\" \"nodemon\"",
 		"build": "tsc",
 		"lint": "biome check .",
-		"start": "node build/index.js"
+		"start": "node dist/index.js"
 	},
 	"author": "",
 	"license": "ISC",
