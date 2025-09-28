@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"tsc -w\" \"nodemon\"",
 		"build": "tsc",
-		"lint": "biome check ."
+		"lint": "biome check .",
+		"start": "node dist/index.js"
 	},
 	"author": "",
 	"license": "ISC",
@@ -16,6 +17,7 @@
 		"@fastify/cookie": "^11.0.2",
 		"@fastify/cors": "^11.1.0",
 		"@fastify/env": "^5.0.2",
+		"@fastify/schedule": "^6.0.0",
 		"@fastify/sensible": "^6.0.3",
 		"@fastify/session": "^11.1.0",
 		"@fastify/swagger": "^9.5.1",
@@ -28,7 +30,8 @@
 		"fastify-bcrypt": "^1.0.1",
 		"fastify-plugin": "^5.0.1",
 		"json-schema-to-ts": "^3.1.1",
-		"rss-parser": "^3.13.0"
+		"rss-parser": "^3.13.0",
+		"toad-scheduler": "^3.1.0"
 	},
 	"devDependencies": {
 		"@types/node": "^24.5.2",

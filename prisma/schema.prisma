@@ -8,13 +8,14 @@ generator client {
 }
 
 model RssFeed {
-  id        String      @id @map("_id") @default(auto()) @db.ObjectId
-  title     String                                
-  link      String   @unique                         
-  content   String?                                 
-  image     String?                                
-  createdAt DateTime @default(now())
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  link      String     @unique
+  content   String
+  image     String?
+  createdAt DateTime   @default(now())
 }
+
 
 model User {
   id    String @id @default(auto()) @map("_id") @db.ObjectId
