@@ -31,7 +31,6 @@ async function buildApp(options: AppOptions = {}) {
 		await fastify.register(AutoLoad, {
 			dir: join(__dirname, "routes"),
 			options: options,
-			matchFilter: file => file.endsWith(".route.ts") || file.endsWith(".route.js"),
 		})
 
 		fastify.log.info("✅ Plugins loaded successfully");
