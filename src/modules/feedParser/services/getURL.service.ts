@@ -5,7 +5,7 @@ export async function getURL(prisma: PrismaClient) {
         select: { link: true },
     });
 
-    if (feedLink && feedLink.link) {
+    if (feedLink) {
         const exists = await prisma.rssFeed.findUnique({
             where: { link: feedLink.link },
         });
