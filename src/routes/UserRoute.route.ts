@@ -19,11 +19,15 @@ const defaultRoute = async (fastify: FastifyInstance) => {
 			};
 			try {
 				// pass Prisma client to keep the service logic separate
-				const { registerUser } = await createUser(fastify.prisma, email, password);
+				const { registerUser } = await createUser(
+					fastify.prisma,
+					email,
+					password,
+				);
 				const user = await registerUser(fastify);
 				return reply.status(201).send({ email: user.email, id: user.id });
 			} catch (error) {
-				return reply.status(500).send({ error: error.message })
+				return reply.status(500).send({ error: error.message });
 			}
 		},
 	);

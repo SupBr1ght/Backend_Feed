@@ -20,4 +20,4 @@ export async function createUser(
 		return user;
 	}
 	return { registerUser };
-} 
+}

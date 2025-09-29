@@ -1,13 +1,12 @@
+import cookie from "@fastify/cookie";
+import { fastifyCors } from "@fastify/cors";
 import fastifyEnv from "@fastify/env";
+import fastifySession from "@fastify/session";
 import Ajv from "ajv";
 import ajvFormats from "ajv-formats";
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
 import { EnvSchema } from "./schema";
-import cookie from "@fastify/cookie";
-import fastifySession from "@fastify/session";
-import cors, { fastifyCors } from '@fastify/cors'
-
 
 export default fp(
 	async (fastify: FastifyInstance) => {
@@ -34,13 +33,11 @@ export default fp(
 						return ajv;
 					},
 				},
-
 			});
 
 			fastify.register(fastifyCors, {
-
 				origin: `${fastify.config.CORS_ORIGIN}`,
-			})
+			});
 			const secret = fastify.config.COOKIE_SECRET;
 			if (!secret) throw new Error("COOKIE_SECRET is not defined");
 
@@ -55,10 +52,9 @@ export default fp(
 					httpOnly: fastify.config.COOKIE_HTTP_ONLY,
 				},
 			});
-			fastify.setErrorHandler((error, request, reply) => {
-				throw error
-			})
-
+			fastify.setErrorHandler((error, _request, _reply) => {
+				throw error;
+			});
 
 			fastify.log.info("✅ Environment variables loaded successfully");
 		} catch (error) {

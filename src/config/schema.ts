@@ -12,7 +12,6 @@ export const EnvSchema = {
 		COOKIE_HTTP_ONLY: { type: "boolean" },
 		FULL_HOST: { type: "string" },
 		CORS_ORIGIN: { type: "string" },
-
 	},
 	required: ["PORT", "HOST", "MONGO_URI", "COOKIE_SECRET"],
 	additionalProperties: false,
