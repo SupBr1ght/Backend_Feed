@@ -22,3 +22,15 @@ model User {
   email String
   Hashedpassword String
 }
+
+model LineItem {
+  id           String   @id @map("_id") @default(auto()) @db.ObjectId
+  size         String
+  minCpm       Float
+  maxCpm       Float
+  geo          String
+  adType       String
+  frequencyCap Int
+  creativeUrl  String
+  createdAt    DateTime @default(now())
+}
