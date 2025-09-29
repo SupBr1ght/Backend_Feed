@@ -1,47 +1,24 @@
 import fp from "fastify-plugin";
-import { SimpleIntervalJob, AsyncTask } from "toad-scheduler";
-import { PrismaClient } from "@prisma/client";
-import { parseFeed } from "../modules/feedParser/services/ feedParser.service";
-const prisma = new PrismaClient();
+import { AsyncTask, SimpleIntervalJob } from "toad-scheduler";
+import { updateFeeds } from "../modules/feedParser/services/cronJob.service";
 
 export default fp(async (fastify) => {
-    const task = new AsyncTask(
-        "parse feeds (cron)",
-        async () => {
-            fastify.log.info("Running feed parser job (RssFeed)");
+	const task = new AsyncTask(
+		"parse feeds (cron)",
+		async () => {
+			fastify.log.info("Running feed parser job (RssFeed)");
+			await updateFeeds(fastify.prisma, fastify.log);
+		},
+		(err?: Error) => {
+			if (err) {
+				fastify.log.error({ err }, "Feed job failed");
+			}
+		},
+	);
 
+	const job = new SimpleIntervalJob({ minutes: 30 }, task);
 
-            const sources = await prisma.rssFeed.findMany({
-                distinct: ["link"],
-                select: { link: true },
-            });
-
-            fastify.log.info(`Found ${sources.length} unique links`);
-
-
-            for (const src of sources) {
-                try {
-                    const result = await parseFeed(prisma, src.link);
-                    fastify.log.info(`Parsed: ${result.feedTitle}, items: ${result.items.length}`);
-                } catch (err) {
-                    fastify.log.error(`Error parsing ${src.link}: ${err}`);
-                }
-            }
-        },
-        (err?: Error) => {
-            if (err) {
-                fastify.log.error({ err }, "Feed job failed");
-            }
-        }
-    );
-
-    const job = new SimpleIntervalJob({ minutes: 30 }, task);
-
-    fastify.ready().then(() => {
-        fastify.scheduler.addSimpleIntervalJob(job);
-    });
-
-    fastify.addHook("onClose", async () => {
-        await prisma.$disconnect();
-    });
+	fastify.ready().then(() => {
+		fastify.scheduler.addSimpleIntervalJob(job);
+	});
 });

@@ -1,7 +1,7 @@
-import Parser from "rss-parser";
-import { PrismaClient } from "@prisma/client";
-import { fetchAndSaveFeedDB } from "./mongodb.service";
+import type { PrismaClient } from "@prisma/client";
 import * as cheerio from "cheerio";
+import Parser from "rss-parser";
+import { fetchAndSaveFeedDB } from "./mongodb.service";
 
 const parser = new Parser();
 
@@ -11,13 +11,19 @@ async function parseHTML(prisma: PrismaClient, url: string) {
 		const html = await res.text();
 		const $ = cheerio.load(html);
 
+		const title =
+			$("h1").first().text().trim() ||
+			$("meta[property='og:title']").attr("content") ||
+			url;
 
-		const title = $("h1").first().text().trim() || $("meta[property='og:title']").attr("content") || url;
+		const image =
+			$("meta[property='og:image']").attr("content") ||
+			$("img").first().attr("src") ||
+			null;
 
-
-		const image = $("meta[property='og:image']").attr("content") || $("img").first().attr("src") || null;
-
-		const paragraphs = $("p").map((i, el) => $(el).text().trim()).get();
+		const paragraphs = $("p")
+			.map((_i, el) => $(el).text().trim())
+			.get();
 		const content = paragraphs.join("\n\n");
 
 		const saved = await fetchAndSaveFeedDB(prisma).upsertFeedItem({
@@ -34,20 +40,26 @@ async function parseHTML(prisma: PrismaClient, url: string) {
 			content,
 			image,
 		};
-	} catch (err) {
+	} catch (_err) {
 		return null;
 	}
 }
 
-export async function parseFeed(prisma: PrismaClient, url: string, force?: boolean) {
+export async function parseFeed(
+	prisma: PrismaClient,
+	url: string,
+	_force?: boolean,
+) {
 	const isRSS = url.includes("/feed/") || url.endsWith(".rss");
 
 	if (isRSS) {
 		const feed = await parser.parseURL(url);
-		const links = feed.items.map(item => item.link).filter(Boolean) as string[];
+		const links = feed.items
+			.map((item) => item.link)
+			.filter(Boolean) as string[];
 
 		const fullArticles = await Promise.all(
-			links.map(link => parseHTML(prisma, link))
+			links.map((link) => parseHTML(prisma, link)),
 		);
 
 		return {
@@ -70,7 +82,6 @@ export async function processAllFeeds(prisma: PrismaClient) {
 	});
 
 	const results: { feedTitle: string; count: number }[] = [];
-
 
 	for (const src of sources) {
 		const result = await parseFeed(prisma, src.link);
